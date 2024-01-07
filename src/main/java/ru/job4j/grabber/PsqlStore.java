@@ -27,6 +27,10 @@ public class PsqlStore implements Store {
         }
     }
 
+    private Post createPost() {
+        return new Post();
+    }
+
     @Override
     public void save(Post post) {
         try (PreparedStatement statement = connection.prepareStatement(
@@ -57,7 +61,7 @@ public class PsqlStore implements Store {
                 "SELECT * FROM post;")) {
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    Post post = new Post();
+                    Post post = createPost();
                     post.setId(resultSet.getInt("id"));
                     post.setTitle(resultSet.getString("title"));
                     post.setDescription(resultSet.getString("description"));
@@ -73,7 +77,7 @@ public class PsqlStore implements Store {
 
     @Override
     public Post findById(int id) {
-        Post post = new Post();
+        Post post = createPost();
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT * FROM post WHERE id = ?")) {
             statement.setInt(1, id);

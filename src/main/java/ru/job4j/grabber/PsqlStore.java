@@ -23,10 +23,6 @@ public class PsqlStore implements Store {
         }
     }
 
-    private Post createPost() {
-        return new Post();
-    }
-
     @Override
     public void save(Post post) {
         try (PreparedStatement statement = connection.prepareStatement(
@@ -50,20 +46,23 @@ public class PsqlStore implements Store {
         }
     }
 
+    private Post createPost(ResultSet resultSet) throws SQLException {
+        Post post = new Post();
+        post.setId(resultSet.getInt("id"));
+        post.setTitle(resultSet.getString("title"));
+        post.setDescription(resultSet.getString("description"));
+        post.setCreated(resultSet.getTimestamp("created").toLocalDateTime());
+        return post;
+    }
+
     @Override
     public List<Post> getAll() {
         List<Post> posts = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT * FROM post;")) {
-            try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    Post post = createPost();
-                    post.setId(resultSet.getInt("id"));
-                    post.setTitle(resultSet.getString("title"));
-                    post.setDescription(resultSet.getString("description"));
-                    post.setCreated(resultSet.getTimestamp("created").toLocalDateTime());
-                    posts.add(post);
-                }
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                posts.add(createPost(resultSet));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -73,16 +72,13 @@ public class PsqlStore implements Store {
 
     @Override
     public Post findById(int id) {
-        Post post = createPost();
+        Post post = null;
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT * FROM post WHERE id = ?")) {
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                post.setId(resultSet.getInt("id"));
-                post.setTitle(resultSet.getString("title"));
-                post.setDescription(resultSet.getString("description"));
-                post.setCreated(resultSet.getTimestamp("created").toLocalDateTime());
+                post = createPost(resultSet);
             }
         } catch (Exception e) {
             e.printStackTrace();

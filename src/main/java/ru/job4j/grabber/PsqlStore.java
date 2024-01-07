@@ -1,9 +1,7 @@
 package ru.job4j.grabber;
 
-import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
 import ru.job4j.grabber.utils.Store;
 
-import java.io.InputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +12,7 @@ public class PsqlStore implements Store {
     private Connection connection;
 
     public PsqlStore(Properties config) {
-        try (InputStream input = PsqlStore.class.getClassLoader()
-                .getResourceAsStream("app.properties")) {
-            config.load(input);
+        try {
             Class.forName(config.getProperty("jdbc.driver"));
             String url = config.getProperty("jdbc.url");
             String login = config.getProperty("jdbc.username");
@@ -99,18 +95,5 @@ public class PsqlStore implements Store {
         if (connection != null) {
             connection.close();
         }
-    }
-
-    public static void main(String[] args) {
-        var db = new PsqlStore(new Properties());
-        var habr = new HabrCareerParse(new HabrCareerDateTimeParser());
-        for (Post post : habr.list("https://career.habr.com/vacancies?q=Java+developer&type=all")) {
-            db.save(post);
-        }
-        for (Post post : db.getAll()) {
-            System.out.println(post);
-        }
-        System.out.println(db.findById(23));
-
     }
 }

@@ -7,7 +7,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
 import ru.job4j.grabber.utils.Parse;
 
 import java.io.IOException;
@@ -51,7 +50,7 @@ public class HabrCareerParse implements Parse {
         List<Post> posts = new ArrayList<>();
         for (int page = 1; page <= PAGES; page++) {
             try {
-                Connection connection = Jsoup.connect(link.replace("?q", "?pages=%sq".formatted(page)));
+                Connection connection = Jsoup.connect(link.replace("?q", "?page=%s&q".formatted(page)));
                 Document document = connection.get();
                 Elements rows = document.select(".vacancy-card__inner");
                 rows.forEach(row -> posts.add(parsePost(row)));
@@ -60,12 +59,5 @@ public class HabrCareerParse implements Parse {
             }
         }
         return posts;
-    }
-
-    public static void main(String[] args) {
-        var habr = new HabrCareerParse(new HabrCareerDateTimeParser());
-        for (Post post : habr.list("https://career.habr.com/vacancies?q=Java+developer&type=all")) {
-            System.out.println(post);
-        }
     }
 }

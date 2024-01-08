@@ -50,6 +50,7 @@ public class PsqlStore implements Store {
         Post post = new Post();
         post.setId(resultSet.getInt("id"));
         post.setTitle(resultSet.getString("title"));
+        post.setLink(resultSet.getString("link"));
         post.setDescription(resultSet.getString("description"));
         post.setCreated(resultSet.getTimestamp("created").toLocalDateTime());
         return post;
